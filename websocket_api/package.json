@@ -1,12 +1,13 @@
 {
   "name": "@exanubes/pulumi-websocket-api",
-  "version": "1.0.5",
+  "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup index.ts --format cjs,esm --dts",
+    "publish": "npm publish --access public",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "peerDependencies": {

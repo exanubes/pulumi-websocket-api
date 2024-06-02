@@ -1,10 +1,10 @@
 import * as pulumi from "@pulumi/pulumi";
 import { CustomResourceOptions } from "@pulumi/pulumi";
 import { ApiArgs } from "@pulumi/aws/apigatewayv2/api";
-import * as classic from "@pulumi/aws";
+import * as aws_classic from "@pulumi/aws";
 import { RouteArgs } from "@pulumi/aws/apigatewayv2/route";
 import { StageArgs } from "@pulumi/aws/apigatewayv2";
-import * as native from "@pulumi/aws-native";
+import * as aws_native from "@pulumi/aws-native";
 import { NodejsFunction, NodejsFunctionArgs } from "@exanubes/pulumi-nodejs-function";
 export type WebsocketApiArgs = Omit<
     ApiArgs,
@@ -16,8 +16,11 @@ export type WebsocketApiArgs = Omit<
     | "routeKey"
     | "target"
 > & {};
+
+export type LambdaIntegrationArgs = Omit<aws_classic.apigatewayv2.IntegrationArgs, "integrationType" | "apiId" | "connectionId" | "integrationMethod" | "integrationSubtype" | "payloadFormatVersion" | "tlsConfig" | "integrationUri">
+
 export class WebsocketApi extends pulumi.ComponentResource {
-    public readonly resource: classic.apigatewayv2.Api;
+    public readonly resource: aws_classic.apigatewayv2.Api;
     public readonly id: pulumi.Output<string>;
     public readonly arn: pulumi.Output<string>;
     public readonly executionArn: pulumi.Output<string>;
@@ -28,7 +31,7 @@ export class WebsocketApi extends pulumi.ComponentResource {
         private options?: CustomResourceOptions,
     ) {
         super("exanubes:aws:WebsocketApi", name, props, options);
-        const api = new classic.apigatewayv2.Api(
+        const api = new aws_classic.apigatewayv2.Api(
             name,
             {
                 ...props,
@@ -45,14 +48,14 @@ export class WebsocketApi extends pulumi.ComponentResource {
     public addRoute(
         path: string,
         props: Omit<RouteArgs, "apiId" | "routeKey" | "target"> & {
-            integration: classic.apigatewayv2.Integration | string;
+            integration: aws_classic.apigatewayv2.Integration | string;
         },
     ) {
         const integrationId =
             typeof props.integration === "string"
                 ? props.integration
                 : props.integration.id;
-        return new classic.apigatewayv2.Route(
+        return new aws_classic.apigatewayv2.Route(
             `${this.name}_${path}_Route`,
             {
                 ...props,
@@ -65,7 +68,7 @@ export class WebsocketApi extends pulumi.ComponentResource {
     }
 
     public addStage(name: string, props: Omit<StageArgs, "name" | "apiId">) {
-        return new classic.apigatewayv2.Stage(
+        return new aws_classic.apigatewayv2.Stage(
             `${this.name}-api-${name}-stage`,
             {
                 ...props,
@@ -84,7 +87,7 @@ export class WebsocketApi extends pulumi.ComponentResource {
             authorizerUri,
             ...props
         }: Omit<
-            native.apigatewayv2.AuthorizerArgs,
+            aws_native.apigatewayv2.AuthorizerArgs,
             "name" | "apiId" | "authorizerType" | "authorizerUri"
         > &
             (
@@ -112,7 +115,7 @@ export class WebsocketApi extends pulumi.ComponentResource {
 
         if (authorizer) {
             const authorizerLambda = (this.authorizerLambda = new NodejsFunction(
-                `${name}_AUTHORIZER_LAMBDA`,
+                `${name}_Authorizer_Lambda`,
                 authorizer,
                 {
                     parent: this,
@@ -128,14 +131,30 @@ export class WebsocketApi extends pulumi.ComponentResource {
         throw new Error("Either authorizer or authorizerUri must be provided");
     }
 
+    public addLambdaIntegration(name: string, lambdaInvokeArn: pulumi.Output<string>, options?: LambdaIntegrationArgs ): aws_classic.apigatewayv2.Integration
+    public addLambdaIntegration(name: string, nodejsFunction: NodejsFunction, options?: LambdaIntegrationArgs ): aws_classic.apigatewayv2.Integration
+    public addLambdaIntegration(name: string, lambda: NodejsFunction | pulumi.Output<string>, options?: LambdaIntegrationArgs) {
+        const integrationUri =  pulumi.Output.isInstance(lambda) ? lambda : lambda.handler.invokeArn;
+        return new aws_classic.apigatewayv2.Integration(
+            `${this.name}_${name}_Integration`,
+            {
+                apiId: this.id,
+                integrationType: "AWS_PROXY",
+                integrationUri,
+                ...options
+            },
+            { parent: this },
+        );
+    }
+
     private createAuthorizer(
         name: string,
         props: Omit<
-            native.apigatewayv2.AuthorizerArgs,
+            aws_native.apigatewayv2.AuthorizerArgs,
             "name" | "apiId" | "authorizerType"
         >,
     ) {
-        return new native.apigatewayv2.Authorizer(
+        return new aws_native.apigatewayv2.Authorizer(
             `${this.name}_${name}_AUTHORIZER`,
             {
                 ...props,
@@ -147,3 +166,4 @@ export class WebsocketApi extends pulumi.ComponentResource {
         );
     }
 }
+
