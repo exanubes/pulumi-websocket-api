@@ -10,6 +10,9 @@
     "publish": "npm publish --access public",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "dependencies": {
+    "@exanubes/pulumi-nodejs-function": "^1.0.5"
+  },
   "peerDependencies": {
     "@pulumi/pulumi": ">=3.0.0",
     "@pulumi/aws": ">=6.0.0",
