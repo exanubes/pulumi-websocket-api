@@ -1,0 +1,17 @@
+{
+  "name": "@exanubes/pulumi-websocket-api",
+  "version": "1.0.5",
+  "description": "",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup index.ts --format cjs,esm --dts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "peerDependencies": {
+    "@pulumi/pulumi": ">=3.0.0",
+    "@pulumi/aws": ">=6.0.0",
+    "@pulumi/aws-native": ">=6.0.0"
+  }
+}
