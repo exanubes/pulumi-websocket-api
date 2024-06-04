@@ -192,4 +192,21 @@ export class WebsocketApi extends pulumi.ComponentResource {
       { parent: this },
     );
   }
+
+  getInvokePolicy(
+    stageName:  pulumi.Input<string>,
+  ): aws_classic.iam.PolicyArgs["policy"] {
+    return {
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Action: ["execute-api:ManageConnections", "execute-api:Invoke"],
+          Effect: "Allow",
+          Resource: [
+            `${this.resource.executionArn}/${stageName}/POST/@connections/*`,
+          ],
+        },
+      ],
+    };
+  }
 }
