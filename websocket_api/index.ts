@@ -9,6 +9,7 @@ import {
   NodejsFunction,
   NodejsFunctionArgs,
 } from "@exanubes/pulumi-nodejs-function";
+import { PolicyDocument } from "@pulumi/aws/iam/documents";
 export type WebsocketApiArgs = Omit<
   ApiArgs,
   | "protocolType"
@@ -194,19 +195,19 @@ export class WebsocketApi extends pulumi.ComponentResource {
   }
 
   getInvokePolicy(
-    stageName:  pulumi.Input<string>,
-  ): aws_classic.iam.PolicyArgs["policy"] {
-    return {
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Action: ["execute-api:ManageConnections", "execute-api:Invoke"],
-          Effect: "Allow",
-          Resource: [
-            `${this.resource.executionArn}/${stageName}/POST/@connections/*`,
-          ],
-        },
-      ],
-    };
+    stageName: pulumi.Input<string> | string,
+  ): pulumi.Output<aws_classic.iam.PolicyDocument> {
+    return pulumi.all([this.resource.executionArn, stageName]).apply(
+      ([executionArn, stageName]): aws_classic.iam.PolicyDocument => ({
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Action: ["execute-api:ManageConnections", "execute-api:Invoke"],
+            Effect: "Allow",
+            Resource: [`${executionArn}/${stageName}/POST/@connections/*`],
+          },
+        ],
+      }),
+    );
   }
 }
