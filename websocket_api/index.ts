@@ -9,7 +9,7 @@ import {
   NodejsFunction,
   NodejsFunctionArgs,
 } from "@exanubes/pulumi-nodejs-function";
-import { PolicyDocument } from "@pulumi/aws/iam/documents";
+
 export type WebsocketApiArgs = Omit<
   ApiArgs,
   | "protocolType"
@@ -81,7 +81,7 @@ export class WebsocketApi extends pulumi.ComponentResource {
     );
   }
 
-  public addStage(name: string, props: Omit<StageArgs, "name" | "apiId">) {
+  public addStage(name: string, props: Omit<StageArgs, "name" | "apiId"> = {}) {
     return new aws_classic.apigatewayv2.Stage(
       `${this.name}-api-${name}-stage`,
       {
@@ -135,7 +135,11 @@ export class WebsocketApi extends pulumi.ComponentResource {
           parent: this,
         },
       ));
-      authorizerLambda.grantInvoke("apigateway.amazonaws.com", this.arn);
+      authorizerLambda.grantInvoke(
+        `AuthorizerLambda_GrantInvoke_${this.name}`,
+        "apigateway.amazonaws.com",
+        this.arn,
+      );
       return this.createAuthorizer(name, {
         ...props,
         authorizerUri: authorizerLambda.handler.invokeArn,

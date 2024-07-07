@@ -16,7 +16,7 @@ const fn = new NodejsFunction("hello_world", {
   code: new pulumi.asset.FileArchive("./lambda"),
   handler: "index.handler",
 });
-const stage = api.addStage("dev", {});
+const stage = api.addStage("dev");
 
 const policy = api.getInvokePolicy(stage.name);
 

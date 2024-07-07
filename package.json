@@ -2,7 +2,7 @@
     "name": "pulumi-websocket-api",
     "main": "index.ts",
     "devDependencies": {
-        "@exanubes/pulumi-nodejs-function": "^1.0.5",
+        "@exanubes/pulumi-nodejs-function": "^1.0.9",
         "@exanubes/pulumi-websocket-api": "workspace:./websocket_api",
         "@types/node": "^18",
         "prettier": "^3.3.0",
