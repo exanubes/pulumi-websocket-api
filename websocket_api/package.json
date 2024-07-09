@@ -1,7 +1,9 @@
 {
   "name": "@exanubes/pulumi-websocket-api",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "",
+  "repository": "https://github.com/exanubes/api-gateway-websocket-custom-domain",
+  "homepage": "https://github.com/exanubes/api-gateway-websocket-custom-domain",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
